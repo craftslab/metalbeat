@@ -1,0 +1,20 @@
+metadata:
+  name: metalbeat
+spec:
+  - name: metalmetrics
+    role: worker
+    node:
+      container:
+        image: craftslab/metalmetrics
+        expose:
+          - 8080
+        command:
+          - ./metalmetrics
+          - --config-file="config.yml"
+          - --output-file="output.json"
+  - name: metalflow
+    role: master
+    node:
+      bare:
+        host: 127.0.0.1
+        port: 2379
