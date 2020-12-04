@@ -82,7 +82,7 @@ spec:
   - name: metalmetrics
     role: worker
     node:
-      docker:
+      container:
         image: craftslab/metalmetrics
         expose:
           - 8080
