@@ -29,20 +29,20 @@ const (
 	timeout = 5 * time.Second
 )
 
-type Flow struct {
+type Beat struct {
 }
 
-func (f Flow) Run() error {
-	if err := f.runFlow(); err != nil {
-		return errors.Wrap(err, "failed to run flow")
+func (b Beat) Run() error {
+	if err := b.runBeat(); err != nil {
+		return errors.Wrap(err, "failed to run")
 	}
 
 	return nil
 }
 
-func (f Flow) runFlow() error {
+func (b Beat) runBeat() error {
 	r := mux.NewRouter()
-	r.HandleFunc("/", f.routine).Methods("POST")
+	r.HandleFunc("/", b.routine).Methods("POST")
 
 	srv := &http.Server{
 		Addr:           "",
@@ -81,6 +81,6 @@ func (f Flow) runFlow() error {
 	return nil
 }
 
-func (f Flow) routine(resp http.ResponseWriter, req *http.Request) {
+func (b Beat) routine(resp http.ResponseWriter, req *http.Request) {
 	// TODO
 }

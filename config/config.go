@@ -14,7 +14,7 @@ package config
 
 type Config struct {
 	MetaData MetaData `yaml:"metadata"`
-	Spec     []Spec     `yaml:"spec"`
+	Spec     []Spec   `yaml:"spec"`
 }
 
 type MetaData struct {
