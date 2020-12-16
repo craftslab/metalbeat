@@ -10,7 +10,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package etcd
+package flow
 
-type Etcd struct {
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestFlow(t *testing.T) {
+	// TODO
+	assert.Equal(t, nil, nil)
 }

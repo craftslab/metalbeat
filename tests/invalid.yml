@@ -1,3 +1,6 @@
+apiVersion: v1
+kind: agent
 metadata:
   name: metalbeat
-spec
+spec:
+  sd:

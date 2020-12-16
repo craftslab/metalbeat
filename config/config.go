@@ -13,8 +13,10 @@
 package config
 
 type Config struct {
-	MetaData MetaData `yaml:"metadata"`
-	Spec     []Spec   `yaml:"spec"`
+	ApiVersion string   `yaml:"apiVersion"`
+	Kind       string   `yaml:"kind"`
+	MetaData   MetaData `yaml:"metadata"`
+	Spec       Spec     `yaml:"spec"`
 }
 
 type MetaData struct {
@@ -22,26 +24,14 @@ type MetaData struct {
 }
 
 type Spec struct {
-	Name string                 `yaml:"name"`
-	Node map[string]interface{} `yaml:"node"`
-	Role string                 `yaml:"role"`
+	Sd string `yaml:"sd"`
 }
 
-type Bare struct {
+type Sd struct {
 	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
+	Name string `yaml:"name"`
+	Port string `yaml:"port"`
 }
-
-type Container struct {
-	Command []string `yaml:"command"`
-	Expose  []int    `yaml:"expose"`
-	Image   string   `yaml:"image"`
-}
-
-const (
-	NodeBare      = "bare"
-	NodeContainer = "container"
-)
 
 var (
 	Build   string

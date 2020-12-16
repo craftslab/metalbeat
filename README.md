@@ -48,7 +48,7 @@ git clone https://github.com/craftslab/metalbeat.git
 
 cd metalbeat
 docker build --no-cache -f Dockerfile -t craftslab/metalbeat:latest .
-docker run -it -p 2379:2379 craftslab/metalbeat:latest ./metalbeat --config-file="config.yml"
+docker run -it craftslab/metalbeat:latest ./metalbeat --config-file="config.yml"
 ```
 
 
@@ -76,26 +76,15 @@ Flags:
 An example of configuration in [config.yml](https://github.com/craftslab/metalbeat/blob/master/config/config.yml):
 
 ```yaml
+apiVersion: v1
+kind: agent
 metadata:
   name: metalbeat
 spec:
-  - name: metalmetrics
-    role: worker
-    node:
-      container:
-        image: craftslab/metalmetrics
-        expose:
-          - 8080
-        command:
-          - ./metalmetrics
-          - --config-file="config.yml"
-          - --output-file="output.json"
-  - name: metalflow
-    role: master
-    node:
-      bare:
-        host: 127.0.0.1
-        port: 2379
+  sd:
+    host: 127.0.0.1
+    name: etcd
+    port: 2379
 ```
 
 
