@@ -12,32 +12,13 @@
 
 package config
 
-type Config struct {
-	ApiVersion string   `yaml:"apiVersion"`
-	Kind       string   `yaml:"kind"`
-	MetaData   MetaData `yaml:"metadata"`
-	Spec       Spec     `yaml:"spec"`
-}
+import (
+	"testing"
 
-type MetaData struct {
-	Name string `yaml:"name"`
-}
-
-type Spec struct {
-	Sd Sd `yaml:"sd"`
-}
-
-type Sd struct {
-	Host string `yaml:"host"`
-	Name string `yaml:"name"`
-	Port string `yaml:"port"`
-}
-
-var (
-	Build   string
-	Version string
+	"github.com/stretchr/testify/assert"
 )
 
-func New() *Config {
-	return &Config{}
+func TestNew(t *testing.T) {
+	cfg := New()
+	assert.NotEqual(t, nil, cfg)
 }

@@ -13,74 +13,20 @@
 package beat
 
 import (
-	"context"
-	"log"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
-
-	"github.com/gorilla/mux"
-	"github.com/pkg/errors"
-)
-
-const (
-	timeout = 5 * time.Second
+	"github.com/craftslab/metalbeat/context"
 )
 
 type Beat struct {
+	Config Config
 }
 
-func (b Beat) Run() error {
-	if err := b.runBeat(); err != nil {
-		return errors.Wrap(err, "failed to run")
-	}
-
-	return nil
+type Config struct {
 }
 
-func (b Beat) runBeat() error {
-	r := mux.NewRouter()
-	r.HandleFunc("/", b.routine).Methods("POST")
-
-	srv := &http.Server{
-		Addr:           "",
-		Handler:        r,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
-
-	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("failed to listen and serve: %v", err)
-		}
-	}()
-
-	// Wait for interrupt signal to gracefully shutdown the server with a timeout of 5 seconds.
-	quit := make(chan os.Signal, 1)
-
-	// kill (no param) default send syscanll.SIGTERM
-	// kill -2 is syscall.SIGINT
-	// kill -9 is syscall.SIGKILL but can"t be caught, so don't need add it
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-
-	log.Println("shutdown server...")
-
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-
-	if err := srv.Shutdown(ctx); err != nil {
-		return errors.Wrap(err, "failed to shutdown")
-	}
-
-	<-ctx.Done()
-
-	return nil
+func New(cfg Config) context.Context {
+	return context.Context{}
 }
 
-func (b Beat) routine(resp http.ResponseWriter, req *http.Request) {
-	// TODO
+func DefaultConfig() Config {
+	return Config{}
 }

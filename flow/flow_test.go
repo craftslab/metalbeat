@@ -19,6 +19,5 @@ import (
 )
 
 func TestFlow(t *testing.T) {
-	// TODO
 	assert.Equal(t, nil, nil)
 }

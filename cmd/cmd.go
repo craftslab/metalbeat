@@ -21,7 +21,10 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 	"gopkg.in/yaml.v2"
 
+	"github.com/craftslab/metalbeat/beat"
 	"github.com/craftslab/metalbeat/config"
+	"github.com/craftslab/metalbeat/context"
+	"github.com/craftslab/metalbeat/flow"
 )
 
 var (
@@ -29,26 +32,33 @@ var (
 	configFile = app.Flag("config-file", "Config file (.yml)").Required().String()
 )
 
-var (
-	cfg = config.Config{}
-)
-
 func Run() {
-	var err error
-
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 
-	cfg, err = parseConfig(*configFile)
+	c, err := initConfig(*configFile)
 	if err != nil {
-		log.Fatalf("failed to parse: %v", err)
+		log.Fatalf("failed to config: %v", err)
+	}
+
+	b, err := initBeat(c)
+	if err != nil {
+		log.Fatalf("failed to beat: %v", err)
 	}
 
 	log.Println("beat running")
+
+	if err := runFlow(b, c); err != nil {
+		log.Fatalf("failed to run: %v", err)
+	}
+
 	log.Println("beat exiting")
 }
 
-func parseConfig(name string) (config.Config, error) {
-	var c config.Config
+func initConfig(name string) (*config.Config, error) {
+	c := config.New()
+	if c == nil {
+		return &config.Config{}, errors.New("failed to new")
+	}
 
 	fi, err := os.Open(name)
 	if err != nil {
@@ -59,10 +69,31 @@ func parseConfig(name string) (config.Config, error) {
 		_ = fi.Close()
 	}()
 
-	buf, _ := ioutil.ReadAll(fi)
-	if err := yaml.Unmarshal(buf, &c); err != nil {
+	buf, err := ioutil.ReadAll(fi)
+	if err != nil {
+		return c, errors.Wrap(err, "failed to readall")
+	}
+
+	if err := yaml.Unmarshal(buf, c); err != nil {
 		return c, errors.Wrap(err, "failed to unmarshal")
 	}
 
 	return c, nil
+}
+
+func initBeat(cfg *config.Config) (context.Context, error) {
+	return beat.New(beat.DefaultConfig()), nil
+}
+
+func runFlow(ctx context.Context, cfg *config.Config) error {
+	f := flow.New(flow.DefaultConfig())
+	if f == nil {
+		return errors.New("failed to new")
+	}
+
+	if err := f.Use(ctx); err != nil {
+		return errors.Wrap(err, "failed to use")
+	}
+
+	return f.Run()
 }

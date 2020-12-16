@@ -18,15 +18,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestParseConfig(t *testing.T) {
+func TestInitConfig(t *testing.T) {
 	var err error
 
-	_, err = parseConfig("invalid.yml")
+	_, err = initConfig("invalid.yml")
 	assert.NotEqual(t, nil, err)
 
-	_, err = parseConfig("../tests/invalid.yml")
+	_, err = initConfig("../tests/invalid.yml")
 	assert.NotEqual(t, nil, err)
 
-	_, err = parseConfig("../tests/config.yml")
+	_, err = initConfig("../tests/config.yml")
 	assert.Equal(t, nil, err)
+}
+
+func TestInitBeat(t *testing.T) {
+	assert.Equal(t, nil, nil)
+}
+
+func TestRunFlow(t *testing.T) {
+	assert.Equal(t, nil, nil)
 }

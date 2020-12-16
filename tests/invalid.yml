@@ -3,4 +3,4 @@ kind: agent
 metadata:
   name: metalbeat
 spec:
-  sd:
+  sd

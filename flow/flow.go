@@ -12,5 +12,31 @@
 
 package flow
 
+import (
+	"github.com/craftslab/metalbeat/context"
+)
+
 type Flow struct {
+	Config Config
+}
+
+type Config struct {
+}
+
+func New(cfg Config) *Flow {
+	return &Flow{
+		Config: cfg,
+	}
+}
+
+func DefaultConfig() Config {
+	return Config{}
+}
+
+func (f Flow) Use(ctx context.Context) error {
+	return nil
+}
+
+func (f Flow) Run() error {
+	return nil
 }
