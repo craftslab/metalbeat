@@ -24,9 +24,9 @@ func TestParseConfig(t *testing.T) {
 	_, err = parseConfig("invalid.yml")
 	assert.NotEqual(t, nil, err)
 
-	_, err = parseConfig("../test/invalid.yml")
+	_, err = parseConfig("../tests/invalid.yml")
 	assert.NotEqual(t, nil, err)
 
-	_, err = parseConfig("../test/config.yml")
+	_, err = parseConfig("../tests/config.yml")
 	assert.Equal(t, nil, err)
 }
