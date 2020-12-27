@@ -15,6 +15,7 @@ package etcd
 import (
 	"context"
 	"crypto/tls"
+	"log"
 	"time"
 
 	"github.com/pkg/errors"
@@ -65,7 +66,7 @@ type etcd struct {
 	watchCtx       context.Context
 }
 
-func New(ctx context.Context, endpoints []string, option Option) Etcd {
+func New(ctx context.Context, endpoints []string, option *Option) Etcd {
 	var cfg *tls.Config
 	var err error
 
@@ -113,12 +114,8 @@ func New(ctx context.Context, endpoints []string, option Option) Etcd {
 func (e *etcd) Register(key, val string, ttl time.Duration) error {
 	var err error
 
-	if key == "" {
-		return errors.New("invalid key")
-	}
-
-	if val == "" {
-		return errors.New("invalid value")
+	if key == "" || val == "" {
+		return errors.New("invalid key/val")
 	}
 
 	if ttl == 0 {
@@ -126,15 +123,26 @@ func (e *etcd) Register(key, val string, ttl time.Duration) error {
 	}
 
 	if e.leaser != nil {
-		if err := e.leaser.Close(); err != nil {
+		if err = e.leaser.Close(); err != nil {
 			return errors.Wrap(err, "failed to close")
 		}
 	}
 
 	e.leaser = clientv3.NewLease(e.cli)
 
+	resp, err := e.leaser.Grant(e.ctx, int64(ttl.Seconds()))
+	if err != nil {
+		return errors.Wrap(err, "failed to grant")
+	}
+
+	e.leaseID = resp.ID
+
+	if e.leaseKeepAlive, err = e.leaser.KeepAlive(e.ctx, e.leaseID); err != nil {
+		return errors.Wrap(err, "failed to keep alive")
+	}
+
 	if e.watcher != nil {
-		if err := e.watcher.Close(); err != nil {
+		if err = e.watcher.Close(); err != nil {
 			return errors.Wrap(err, "failed to close")
 		}
 	}
@@ -145,38 +153,16 @@ func (e *etcd) Register(key, val string, ttl time.Duration) error {
 		e.kv = clientv3.NewKV(e.cli)
 	}
 
-	resp, err := e.leaser.Grant(e.ctx, int64(ttl.Seconds()))
-	if err != nil {
-		return errors.Wrap(err, "failed to grant")
-	}
-
-	e.leaseID = resp.ID
-
 	if _, err = e.kv.Put(e.ctx, key, val, clientv3.WithLease(e.leaseID)); err != nil {
 		return errors.Wrap(err, "failed to put")
 	}
 
-	if e.leaseKeepAlive, err = e.leaser.KeepAlive(e.ctx, e.leaseID); err != nil {
-		return errors.Wrap(err, "failed to keep alive")
-	}
-
-	go func() {
-		for {
-			select {
-			case r := <-e.leaseKeepAlive:
-				if r == nil {
-					return
-				}
-			case <-e.ctx.Done():
-				return
-			}
-		}
-	}()
+	go e.routine()
 
 	return nil
 }
 
-func (e etcd) Deregister(key string) error {
+func (e *etcd) Deregister(key string) error {
 	defer e.close()
 
 	if key == "" {
@@ -190,7 +176,7 @@ func (e etcd) Deregister(key string) error {
 	return nil
 }
 
-func (e etcd) GetEntries(key string) ([]string, error) {
+func (e *etcd) GetEntries(key string) ([]string, error) {
 	resp, err := e.kv.Get(e.ctx, key, clientv3.WithPrefix())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get")
@@ -218,20 +204,33 @@ func (e *etcd) WatchPrefix(prefix string, ch chan struct{}) {
 	}
 }
 
-func (e etcd) LeaseID() int64 {
+func (e *etcd) LeaseID() int64 {
 	return int64(e.leaseID)
 }
 
-func (e etcd) close() {
+func (e *etcd) routine() {
+	for {
+		select {
+		case r := <-e.leaseKeepAlive:
+			if r == nil {
+				return
+			}
+		case <-e.ctx.Done():
+			return
+		}
+	}
+}
+
+func (e *etcd) close() {
 	if e.leaser != nil {
 		if err := e.leaser.Close(); err != nil {
-			// PASS
+			log.Printf("failed to close: %v", err)
 		}
 	}
 
 	if e.watcher != nil {
 		if err := e.watcher.Close(); err != nil {
-			// PASS
+			log.Printf("failed to close: %v", err)
 		}
 	}
 
