@@ -13,11 +13,41 @@
 package etcd
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc"
 )
 
 func TestEtcd(t *testing.T) {
-	assert.Equal(t, nil, nil)
+	endpoint := "127.0.0.1:2379"
+	option := Option{
+		CACert:        "",
+		CertFile:      "",
+		DialKeepAlive: dialKeepAlive,
+		DialOptions:   []grpc.DialOption{grpc.WithBlock()},
+		DialTimeout:   dialTimeout,
+		KeyFile:       "",
+		Password:      "",
+		Username:      "",
+	}
+
+	e := New(context.Background(), []string{endpoint}, option)
+	assert.NotEqual(t, nil, e)
+
+	key := "/metalflow/127.0.0.1"
+	val := "metalbeat"
+
+	err := e.Register(key, val, ttlDuration)
+	assert.Equal(t, nil, err)
+
+	_, err = e.GetEntries(key)
+	assert.Equal(t, nil, err)
+
+	id := e.LeaseID()
+	assert.NotEqual(t, 0, id)
+
+	err = e.Deregister(key)
+	assert.Equal(t, nil, err)
 }
