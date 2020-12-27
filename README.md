@@ -103,6 +103,7 @@ Project License can be found [here](LICENSE).
 
 ## Reference
 
-- [Protocol Buffers](https://developers.google.com/protocol-buffers/docs/proto3)
 - [etcd](https://etcd.io/docs/)
-- [gRPC in Go](https://grpc.io/docs/languages/go/)
+- [gRPC](https://grpc.io/docs/languages/go/)
+- [kit](https://github.com/go-kit/kit)
+- [protobuf](https://developers.google.com/protocol-buffers/docs/proto3)

@@ -10,7 +10,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package sd
+package etcd
 
 import (
 	"testing"
@@ -18,6 +18,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRegistrar(t *testing.T) {
+func TestEtcd(t *testing.T) {
 	assert.Equal(t, nil, nil)
 }
