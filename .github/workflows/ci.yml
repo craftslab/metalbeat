@@ -18,10 +18,10 @@ jobs:
           go-version: 1.15
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Check go mod
-        run: |
-          go mod tidy
-          #git diff --exit-code go.mod
+      #- name: Check go mod
+      #- run: |
+      #-   go mod tidy
+      #-   git diff --exit-code go.mod
   golangci-lint:
     runs-on: ubuntu-latest
     steps:
