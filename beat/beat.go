@@ -12,21 +12,24 @@
 
 package beat
 
-import (
-	"github.com/craftslab/metalbeat/context"
-)
-
-type Beat struct {
-	Config Config
+type Beat interface {
+	Run() error
 }
 
 type Config struct {
 }
 
-func New(cfg Config) context.Context {
-	return context.Context{}
+type beat struct {
 }
 
-func DefaultConfig() Config {
-	return Config{}
+func New(config *Config) Beat {
+	return &beat{}
+}
+
+func DefaultConfig() *Config {
+	return &Config{}
+}
+
+func (b *beat) Run() error {
+	return nil
 }

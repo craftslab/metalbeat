@@ -31,10 +31,10 @@ func TestInitConfig(t *testing.T) {
 	assert.Equal(t, nil, err)
 }
 
-func TestInitBeat(t *testing.T) {
+func TestInitEtcd(t *testing.T) {
 	assert.Equal(t, nil, nil)
 }
 
-func TestRunFlow(t *testing.T) {
+func TestInitBeat(t *testing.T) {
 	assert.Equal(t, nil, nil)
 }

@@ -13,6 +13,7 @@
 package cmd
 
 import (
+	"context"
 	"io/ioutil"
 	"log"
 	"os"
@@ -23,8 +24,7 @@ import (
 
 	"github.com/craftslab/metalbeat/beat"
 	"github.com/craftslab/metalbeat/config"
-	"github.com/craftslab/metalbeat/context"
-	"github.com/craftslab/metalbeat/flow"
+	"github.com/craftslab/metalbeat/etcd"
 )
 
 var (
@@ -37,18 +37,23 @@ func Run() {
 
 	c, err := initConfig(*configFile)
 	if err != nil {
-		log.Fatalf("failed to config: %v", err)
+		log.Fatalf("failed to init config: %v", err)
 	}
 
-	b, err := initBeat(c)
+	e, err := initEtcd(c)
 	if err != nil {
-		log.Fatalf("failed to beat: %v", err)
+		log.Fatalf("failed to init etcd: %v", err)
+	}
+
+	b, err := initBeat(c, e)
+	if err != nil {
+		log.Fatalf("failed to init beat: %v", err)
 	}
 
 	log.Println("beat running")
 
-	if err := runFlow(b, c); err != nil {
-		log.Fatalf("failed to run: %v", err)
+	if err := b.Run(); err != nil {
+		log.Fatalf("failed to run beat: %v", err)
 	}
 
 	log.Println("beat exiting")
@@ -81,19 +86,11 @@ func initConfig(name string) (*config.Config, error) {
 	return c, nil
 }
 
-func initBeat(cfg *config.Config) (context.Context, error) {
-	return beat.New(beat.DefaultConfig()), nil
+func initEtcd(cfg *config.Config) (etcd.Etcd, error) {
+	endpoint := cfg.Spec.Sd.Host + ":" + cfg.Spec.Sd.Port
+	return etcd.New(context.Background(), []string{endpoint}, etcd.DefaultConfig()), nil
 }
 
-func runFlow(ctx context.Context, cfg *config.Config) error {
-	f := flow.New(flow.DefaultConfig())
-	if f == nil {
-		return errors.New("failed to new")
-	}
-
-	if err := f.Use(ctx); err != nil {
-		return errors.Wrap(err, "failed to use")
-	}
-
-	return f.Run()
+func initBeat(_ *config.Config, _ etcd.Etcd) (beat.Beat, error) {
+	return beat.New(beat.DefaultConfig()), nil
 }

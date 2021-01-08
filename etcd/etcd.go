@@ -43,7 +43,7 @@ type Etcd interface {
 	LeaseID() int64
 }
 
-type Option struct {
+type Config struct {
 	CACert        string
 	CertFile      string
 	DialKeepAlive time.Duration
@@ -66,23 +66,23 @@ type etcd struct {
 	watchCtx       context.Context
 }
 
-func New(ctx context.Context, endpoints []string, option *Option) Etcd {
+func New(ctx context.Context, endpoints []string, config *Config) Etcd {
 	var cfg *tls.Config
 	var err error
 
-	if option.DialKeepAlive == 0 {
-		option.DialKeepAlive = dialKeepAlive
+	if config.DialKeepAlive == 0 {
+		config.DialKeepAlive = dialKeepAlive
 	}
 
-	if option.DialTimeout == 0 {
-		option.DialTimeout = dialTimeout
+	if config.DialTimeout == 0 {
+		config.DialTimeout = dialTimeout
 	}
 
-	if option.CertFile != "" && option.KeyFile != "" {
+	if config.CertFile != "" && config.KeyFile != "" {
 		tlsInfo := transport.TLSInfo{
-			CertFile:      option.CertFile,
-			KeyFile:       option.KeyFile,
-			TrustedCAFile: option.CACert,
+			CertFile:      config.CertFile,
+			KeyFile:       config.KeyFile,
+			TrustedCAFile: config.CACert,
 		}
 
 		if cfg, err = tlsInfo.ClientConfig(); err != nil {
@@ -93,12 +93,12 @@ func New(ctx context.Context, endpoints []string, option *Option) Etcd {
 	cli, err := clientv3.New(clientv3.Config{
 		Context:           ctx,
 		Endpoints:         endpoints,
-		DialTimeout:       option.DialTimeout,
-		DialKeepAliveTime: option.DialKeepAlive,
-		DialOptions:       option.DialOptions,
+		DialTimeout:       config.DialTimeout,
+		DialKeepAliveTime: config.DialKeepAlive,
+		DialOptions:       config.DialOptions,
 		TLS:               cfg,
-		Username:          option.Username,
-		Password:          option.Password,
+		Username:          config.Username,
+		Password:          config.Password,
 	})
 	if err != nil {
 		return nil
@@ -108,6 +108,19 @@ func New(ctx context.Context, endpoints []string, option *Option) Etcd {
 		cli: cli,
 		ctx: ctx,
 		kv:  clientv3.NewKV(cli),
+	}
+}
+
+func DefaultConfig() *Config {
+	return &Config{
+		CACert:        "",
+		CertFile:      "",
+		DialKeepAlive: dialKeepAlive,
+		DialOptions:   []grpc.DialOption{grpc.WithBlock()},
+		DialTimeout:   dialTimeout,
+		KeyFile:       "",
+		Password:      "",
+		Username:      "",
 	}
 }
 
@@ -196,6 +209,7 @@ func (e *etcd) WatchPrefix(prefix string, ch chan struct{}) {
 
 	wch := e.watcher.Watch(e.watchCtx, prefix, clientv3.WithPrefix(), clientv3.WithRev(0))
 	ch <- struct{}{}
+
 	for item := range wch {
 		if item.Canceled {
 			return

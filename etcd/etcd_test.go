@@ -22,7 +22,7 @@ import (
 
 func TestEtcd(t *testing.T) {
 	endpoint := "127.0.0.1:2379"
-	option := Option{
+	config := Config{
 		CACert:        "",
 		CertFile:      "",
 		DialKeepAlive: dialKeepAlive,
@@ -33,7 +33,7 @@ func TestEtcd(t *testing.T) {
 		Username:      "",
 	}
 
-	e := New(context.Background(), []string{endpoint}, &option)
+	e := New(context.Background(), []string{endpoint}, &config)
 	assert.NotEqual(t, nil, e)
 
 	key := "/metalflow/127.0.0.1"
