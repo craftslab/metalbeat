@@ -10,7 +10,7 @@ tar zxvf $ETCD.tar.gz
 export PATH=$PWD/$ETCD:$PATH
 
 # Start a local etcd server
-etcd --advertise-client-urls $URL --listen-client-urls $URL
+etcd --advertise-client-urls $URL --listen-client-urls $URL &
 
 # Write to etcd
 #ETCDCTL_API=3 etcdctl --endpoints=127.0.0.1:2379 put "/path/to/key" "val"
