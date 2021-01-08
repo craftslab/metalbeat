@@ -13,6 +13,9 @@ build: go-build
 clean: go-clean
 .PHONY: clean
 
+etcd: go-etcd
+.PHONY: etcd
+
 lint: go-lint
 .PHONY: lint
 
@@ -30,6 +33,9 @@ go-build: FORCE
 
 go-clean: FORCE
 	./script/clean.sh
+
+go-etcd: FORCE
+	./script/etcd.sh
 
 go-lint: FORCE
 	./script/lint.sh
