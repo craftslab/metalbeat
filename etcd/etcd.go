@@ -30,7 +30,7 @@ const (
 )
 
 const (
-	ttlDuration = 3 * 500 * time.Millisecond
+	ttlDuration = 30 * time.Second
 )
 
 type Etcd interface {
@@ -67,7 +67,7 @@ type etcd struct {
 }
 
 func New(ctx context.Context, endpoints []string, config *Config) Etcd {
-	var cfg *tls.Config
+	var _tls *tls.Config
 	var err error
 
 	if config.DialKeepAlive == 0 {
@@ -85,7 +85,7 @@ func New(ctx context.Context, endpoints []string, config *Config) Etcd {
 			TrustedCAFile: config.CACert,
 		}
 
-		if cfg, err = tlsInfo.ClientConfig(); err != nil {
+		if _tls, err = tlsInfo.ClientConfig(); err != nil {
 			return nil
 		}
 	}
@@ -96,7 +96,7 @@ func New(ctx context.Context, endpoints []string, config *Config) Etcd {
 		DialTimeout:       config.DialTimeout,
 		DialKeepAliveTime: config.DialKeepAlive,
 		DialOptions:       config.DialOptions,
-		TLS:               cfg,
+		TLS:               _tls,
 		Username:          config.Username,
 		Password:          config.Password,
 	})
@@ -154,14 +154,6 @@ func (e *etcd) Register(key, val string, ttl time.Duration) error {
 		return errors.Wrap(err, "failed to keep alive")
 	}
 
-	if e.watcher != nil {
-		if err = e.watcher.Close(); err != nil {
-			return errors.Wrap(err, "failed to close")
-		}
-	}
-
-	e.watcher = clientv3.NewWatcher(e.cli)
-
 	if e.kv == nil {
 		e.kv = clientv3.NewKV(e.cli)
 	}
@@ -169,6 +161,14 @@ func (e *etcd) Register(key, val string, ttl time.Duration) error {
 	if _, err = e.kv.Put(e.ctx, key, val, clientv3.WithLease(e.leaseID)); err != nil {
 		return errors.Wrap(err, "failed to put")
 	}
+
+	if e.watcher != nil {
+		if err = e.watcher.Close(); err != nil {
+			return errors.Wrap(err, "failed to close")
+		}
+	}
+
+	e.watcher = clientv3.NewWatcher(e.cli)
 
 	go e.routine()
 

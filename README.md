@@ -17,7 +17,7 @@
 ## Prerequisites
 
 - Go >= 1.15.0
-- etcd >= 3.4.0
+- etcd == 3.3.25
 - gRPC == 1.26.0
 
 
@@ -104,6 +104,7 @@ Project License can be found [here](LICENSE).
 ## Reference
 
 - [etcd](https://etcd.io/docs/)
+- [go-kit](https://github.com/go-kit/kit)
+- [go-zero](https://github.com/tal-tech/go-zero)
 - [gRPC](https://grpc.io/docs/languages/go/)
-- [kit](https://github.com/go-kit/kit)
 - [protobuf](https://developers.google.com/protocol-buffers/docs/proto3)

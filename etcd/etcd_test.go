@@ -42,8 +42,9 @@ func TestEtcd(t *testing.T) {
 	err := e.Register(key, val, ttlDuration)
 	assert.Equal(t, nil, err)
 
-	_, err = e.GetEntries(key)
+	entries, err := e.GetEntries(key)
 	assert.Equal(t, nil, err)
+	assert.NotEqual(t, 0, len(entries))
 
 	id := e.LeaseID()
 	assert.NotEqual(t, 0, id)
