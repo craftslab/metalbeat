@@ -52,9 +52,9 @@ func TestEtcd(t *testing.T) {
 	err = e.Deregister("")
 	assert.NotEqual(t, nil, err)
 
-	prefix := "/metalbeat"
-	key := prefix + "/127.0.0.1"
-	val := "register"
+	prefix := "/metalflow/agent"
+	key := prefix + "/127.0.0.1/name"
+	val := "metalbeat"
 
 	err = e.Register(key, val, ttlDuration)
 	assert.Equal(t, nil, err)

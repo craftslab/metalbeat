@@ -25,7 +25,7 @@ import (
 	"github.com/craftslab/metalbeat/beat"
 	"github.com/craftslab/metalbeat/config"
 	"github.com/craftslab/metalbeat/etcd"
-	"github.com/craftslab/metalbeat/service"
+	"github.com/craftslab/metalbeat/flow"
 )
 
 var (
@@ -54,7 +54,7 @@ func Run() {
 
 	log.Println("beat running")
 
-	if err := runService(c, b, e); err != nil {
+	if err := runFlow(c, b, e); err != nil {
 		log.Fatalf("failed to run beat: %v", err)
 	}
 
@@ -97,18 +97,18 @@ func initBeat(_ *config.Config) (beat.Beat, error) {
 	return beat.New(beat.DefaultConfig()), nil
 }
 
-func runService(_ *config.Config, b beat.Beat, e etcd.Etcd) error {
-	cfg := service.DefaultConfig()
+func runFlow(_ *config.Config, b beat.Beat, e etcd.Etcd) error {
+	cfg := flow.DefaultConfig()
 	if cfg == nil {
 		return errors.New("failed to config")
 	}
 
 	cfg.Host = *hostAddr
 
-	srv := service.New(b, e, cfg)
-	if srv == nil {
+	fl := flow.New(b, e, cfg)
+	if fl == nil {
 		return errors.New("failed to new")
 	}
 
-	return srv.Run()
+	return fl.Run()
 }

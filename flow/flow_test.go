@@ -10,7 +10,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package service
+package flow
 
 import (
 	"testing"
@@ -18,6 +18,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestService(t *testing.T) {
+func TestFlow(t *testing.T) {
 	assert.Equal(t, nil, nil)
 }

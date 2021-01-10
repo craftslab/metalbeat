@@ -10,14 +10,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package service
+package flow
 
 import (
 	"github.com/craftslab/metalbeat/beat"
 	"github.com/craftslab/metalbeat/etcd"
 )
 
-type Service interface {
+type Flow interface {
 	Run() error
 }
 
@@ -25,7 +25,7 @@ type Config struct {
 	Host string
 }
 
-type service struct {
+type flow struct {
 	beat beat.Beat
 	etcd etcd.Etcd
 	quit chan struct{}
@@ -33,12 +33,12 @@ type service struct {
 	wch  string
 }
 
-func New(b beat.Beat, e etcd.Etcd, c *Config) Service {
-	return &service{
+func New(b beat.Beat, e etcd.Etcd, c *Config) Flow {
+	return &flow{
 		beat: b,
 		etcd: e,
-		reg:  "/metalbeat/" + c.Host,
-		wch:  "/metalflow/" + c.Host,
+		reg:  "/metalflow/agent/" + c.Host + "/name",
+		wch:  "/metalflow/worker/" + c.Host,
 	}
 }
 
@@ -48,25 +48,25 @@ func DefaultConfig() *Config {
 	}
 }
 
-func (b *service) Run() error {
+func (f *flow) Run() error {
 	ch := make(chan struct{})
 
 	go func() {
-		_ = b.etcd.Watch(b.wch, ch)
+		_ = f.etcd.Watch(f.wch, ch)
 	}()
 
 	defer func() {
-		_ = b.etcd.Dewatch(b.wch)
+		_ = f.etcd.Dewatch(f.wch)
 	}()
 
 	for {
 		select {
 		case <-ch:
-			_, err := b.etcd.GetEntries(b.wch)
+			_, err := f.etcd.GetEntries(f.wch)
 			if err != nil {
 				continue
 			}
-		case <-b.quit:
+		case <-f.quit:
 			return nil
 		}
 	}
