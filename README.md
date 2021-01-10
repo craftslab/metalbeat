@@ -90,6 +90,30 @@ spec:
 
 
 
+## Etcd
+
+- Agent
+
+```
+key: /metalflow/agent/{HOST}/name
+val: metalbeat
+```
+
+- Master
+
+```
+key: /metalflow/worker/{HOST}/docker
+val: pull|restart|rm|rmi|run|start|stop
+
+key: /metalflow/worker/{HOST}/name
+val: metalmetrics
+
+key: /metalflow/worker/{HOST}/port
+val: 9090
+```
+
+
+
 ## Design
 
 ![design](design.png)
