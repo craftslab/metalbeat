@@ -49,12 +49,6 @@ func DefaultConfig() *Config {
 }
 
 func (b *service) Run() error {
-	go b.routine()
-
-	return nil
-}
-
-func (b *service) routine() {
 	ch := make(chan struct{})
 
 	go func() {
@@ -73,7 +67,7 @@ func (b *service) routine() {
 				continue
 			}
 		case <-b.quit:
-			return
+			return nil
 		}
 	}
 }
