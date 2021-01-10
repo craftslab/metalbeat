@@ -21,7 +21,6 @@ import (
 )
 
 func TestEtcd(t *testing.T) {
-	endpoint := "127.0.0.1:2379"
 	config := Config{
 		CACert:        "",
 		CertFile:      "",
@@ -33,13 +32,31 @@ func TestEtcd(t *testing.T) {
 		Username:      "",
 	}
 
+	endpoint := "127.0.0.1:2379"
+
 	e := New(context.Background(), []string{endpoint}, &config)
 	assert.NotEqual(t, nil, e)
 
-	key := "/metalbeat/127.0.0.1"
+	err := e.Register("", "", ttlDuration)
+	assert.NotEqual(t, nil, err)
+
+	err = e.Watch("", nil)
+	assert.NotEqual(t, nil, err)
+
+	err = e.Dewatch("")
+	assert.NotEqual(t, nil, err)
+
+	_, err = e.GetEntries("")
+	assert.NotEqual(t, nil, err)
+
+	err = e.Deregister("")
+	assert.NotEqual(t, nil, err)
+
+	prefix := "/metalbeat"
+	key := prefix + "/127.0.0.1"
 	val := "register"
 
-	err := e.Register(key, val, ttlDuration)
+	err = e.Register(key, val, ttlDuration)
 	assert.Equal(t, nil, err)
 
 	entries, err := e.GetEntries(key)

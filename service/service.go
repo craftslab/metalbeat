@@ -49,13 +49,21 @@ func DefaultConfig() *Config {
 }
 
 func (b *service) Run() error {
+	go b.routine()
+
 	return nil
 }
 
 func (b *service) routine() {
 	ch := make(chan struct{})
 
-	go b.etcd.WatchPrefix(b.wch, ch)
+	go func() {
+		_ = b.etcd.Watch(b.wch, ch)
+	}()
+
+	defer func() {
+		_ = b.etcd.Dewatch(b.wch)
+	}()
 
 	for {
 		select {

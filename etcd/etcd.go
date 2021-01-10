@@ -15,7 +15,6 @@ package etcd
 import (
 	"context"
 	"crypto/tls"
-	"log"
 	"time"
 
 	"github.com/pkg/errors"
@@ -37,9 +36,10 @@ type Etcd interface {
 	Register(key, val string, ttl time.Duration) error
 	Deregister(key string) error
 
-	GetEntries(prefix string) ([]string, error)
-	WatchPrefix(prefix string, ch chan struct{})
+	Watch(prefix string, ch chan struct{}) error
+	Dewatch(prefix string) error
 
+	GetEntries(prefix string) ([]string, error)
 	LeaseID() int64
 }
 
@@ -162,21 +162,28 @@ func (e *etcd) Register(key, val string, ttl time.Duration) error {
 		return errors.Wrap(err, "failed to put")
 	}
 
-	if e.watcher != nil {
-		if err = e.watcher.Close(); err != nil {
-			return errors.Wrap(err, "failed to close")
+	go func() {
+		for {
+			select {
+			case r := <-e.leaseKeepAlive:
+				if r == nil {
+					return
+				}
+			case <-e.ctx.Done():
+				return
+			}
 		}
-	}
-
-	e.watcher = clientv3.NewWatcher(e.cli)
-
-	go e.routine()
+	}()
 
 	return nil
 }
 
 func (e *etcd) Deregister(key string) error {
-	defer e.close()
+	defer func() {
+		if e.leaser != nil {
+			_ = e.leaser.Close()
+		}
+	}()
 
 	if key == "" {
 		return errors.New("invalid key")
@@ -189,7 +196,60 @@ func (e *etcd) Deregister(key string) error {
 	return nil
 }
 
+func (e *etcd) Watch(prefix string, ch chan struct{}) error {
+	defer func() {
+		if e.watcher != nil {
+			_ = e.watcher.Close()
+		}
+
+		if e.watchCancel != nil {
+			e.watchCancel()
+		}
+	}()
+
+	if prefix == "" {
+		return errors.New("invalid prefix")
+	}
+
+	e.watcher = clientv3.NewWatcher(e.cli)
+	e.watchCtx, e.watchCancel = context.WithCancel(e.ctx)
+
+	wch := e.watcher.Watch(e.watchCtx, prefix, clientv3.WithPrefix(), clientv3.WithRev(0))
+	ch <- struct{}{}
+
+	for item := range wch {
+		if item.Canceled {
+			return nil
+		}
+		ch <- struct{}{}
+	}
+
+	return nil
+}
+
+func (e *etcd) Dewatch(prefix string) error {
+	defer func() {
+		if e.watcher != nil {
+			_ = e.watcher.Close()
+		}
+
+		if e.watchCancel != nil {
+			e.watchCancel()
+		}
+	}()
+
+	if prefix == "" {
+		return errors.New("invalid prefix")
+	}
+
+	return nil
+}
+
 func (e *etcd) GetEntries(key string) ([]string, error) {
+	if key == "" {
+		return nil, errors.New("invalid key")
+	}
+
 	resp, err := e.kv.Get(e.ctx, key, clientv3.WithPrefix())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get")
@@ -203,52 +263,6 @@ func (e *etcd) GetEntries(key string) ([]string, error) {
 	return entries, nil
 }
 
-func (e *etcd) WatchPrefix(prefix string, ch chan struct{}) {
-	e.watcher = clientv3.NewWatcher(e.cli)
-	e.watchCtx, e.watchCancel = context.WithCancel(e.ctx)
-
-	wch := e.watcher.Watch(e.watchCtx, prefix, clientv3.WithPrefix(), clientv3.WithRev(0))
-	ch <- struct{}{}
-
-	for item := range wch {
-		if item.Canceled {
-			return
-		}
-		ch <- struct{}{}
-	}
-}
-
 func (e *etcd) LeaseID() int64 {
 	return int64(e.leaseID)
-}
-
-func (e *etcd) routine() {
-	for {
-		select {
-		case r := <-e.leaseKeepAlive:
-			if r == nil {
-				return
-			}
-		case <-e.ctx.Done():
-			return
-		}
-	}
-}
-
-func (e *etcd) close() {
-	if e.leaser != nil {
-		if err := e.leaser.Close(); err != nil {
-			log.Printf("failed to close: %v", err)
-		}
-	}
-
-	if e.watcher != nil {
-		if err := e.watcher.Close(); err != nil {
-			log.Printf("failed to close: %v", err)
-		}
-	}
-
-	if e.watchCancel != nil {
-		e.watchCancel()
-	}
 }
