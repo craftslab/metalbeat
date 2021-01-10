@@ -28,6 +28,6 @@ func TestRunRuntime(t *testing.T) {
 
 	var req []interface{}
 
-	_, err := runRuntime(op, req)
+	_, err := Run(op, req)
 	assert.Equal(t, nil, err)
 }

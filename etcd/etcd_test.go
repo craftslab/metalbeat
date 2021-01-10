@@ -36,8 +36,8 @@ func TestEtcd(t *testing.T) {
 	e := New(context.Background(), []string{endpoint}, &config)
 	assert.NotEqual(t, nil, e)
 
-	key := "/metalflow/127.0.0.1"
-	val := "metalbeat"
+	key := "/metalbeat/127.0.0.1"
+	val := "register"
 
 	err := e.Register(key, val, ttlDuration)
 	assert.Equal(t, nil, err)

@@ -36,7 +36,7 @@ make build
 ## Run
 
 ```bash
-./metalbeat --config-file="config.yml"
+./metalbeat --config-file="config.yml" --host-addr="127.0.0.1"
 ```
 
 
@@ -48,7 +48,7 @@ git clone https://github.com/craftslab/metalbeat.git
 
 cd metalbeat
 docker build --no-cache -f Dockerfile -t craftslab/metalbeat:latest .
-docker run -it craftslab/metalbeat:latest ./metalbeat --config-file="config.yml"
+docker run -it craftslab/metalbeat:latest ./metalbeat --config-file="config.yml" --host-addr="127.0.0.1"
 ```
 
 
@@ -56,7 +56,7 @@ docker run -it craftslab/metalbeat:latest ./metalbeat --config-file="config.yml"
 ## Usage
 
 ```bash
-usage: metalbeat --config-file=CONFIG-FILE [<flags>]
+usage: metalbeat --config-file=CONFIG-FILE --host-addr=HOST-ADDR [<flags>]
 
 Metal Beat
 
@@ -65,6 +65,7 @@ Flags:
                              and --help-man).
   --version                  Show application version.
   --config-file=CONFIG-FILE  Config file (.yml)
+  --host-addr=HOST-ADDR      Host address
 ```
 
 

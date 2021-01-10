@@ -10,7 +10,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package service
 
 import (
 	"testing"
@@ -18,31 +18,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInitConfig(t *testing.T) {
-	var err error
-
-	_, err = initConfig("invalid.yml")
-	assert.NotEqual(t, nil, err)
-
-	_, err = initConfig("../tests/invalid.yml")
-	assert.NotEqual(t, nil, err)
-
-	_, err = initConfig("../tests/config.yml")
-	assert.Equal(t, nil, err)
-}
-
-func TestInitEtcd(t *testing.T) {
-	c, err := initConfig("../tests/config.yml")
-	assert.Equal(t, nil, err)
-
-	_, err = initEtcd(c)
-	assert.Equal(t, nil, err)
-}
-
-func TestInitBeat(t *testing.T) {
-	c, err := initConfig("../tests/config.yml")
-	assert.Equal(t, nil, err)
-
-	_, err = initBeat(c)
-	assert.Equal(t, nil, err)
+func TestService(t *testing.T) {
+	assert.Equal(t, nil, nil)
 }

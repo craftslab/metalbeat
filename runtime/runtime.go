@@ -20,10 +20,6 @@ type bundle struct {
 }
 
 func Run(op Operation, req []interface{}) ([]interface{}, error) {
-	return runRuntime(op, req)
-}
-
-func runRuntime(op Operation, req []interface{}) ([]interface{}, error) {
 	helper := func(op Operation) (chan *bundle, chan bool) {
 		data := make(chan *bundle)
 		quit := make(chan bool)
