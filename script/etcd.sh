@@ -13,15 +13,15 @@ export PATH=$PWD/$ETCD:$PATH
 etcd --advertise-client-urls $URL --listen-client-urls $URL &
 
 # Write to etcd
-ETCDCTL_API=3 etcdctl --endpoints=127.0.0.1:2379 put "/path/to/key" "val"
+#ETCDCTL_API=3 etcdctl --endpoints=127.0.0.1:2379 put "/path/to/key" "val"
 
 # Read from etcd
-ETCDCTL_API=3 etcdctl --endpoints=127.0.0.1:2379 get "/" --keys-only=true --prefix
-ETCDCTL_API=3 etcdctl --endpoints=127.0.0.1:2379 get "/path/to/" --prefix
-ETCDCTL_API=3 etcdctl --endpoints=127.0.0.1:2379 get "/path/to/key"
+#ETCDCTL_API=3 etcdctl --endpoints=127.0.0.1:2379 get "/" --keys-only=true --prefix
+#ETCDCTL_API=3 etcdctl --endpoints=127.0.0.1:2379 get "/path/to/" --prefix
+#ETCDCTL_API=3 etcdctl --endpoints=127.0.0.1:2379 get "/path/to/key"
 
 # Delete from etcd
-ETCDCTL_API=3 etcdctl --endpoints=127.0.0.1:2379 del "/path/to/key"
+#ETCDCTL_API=3 etcdctl --endpoints=127.0.0.1:2379 del "/path/to/key"
 
 # Watch on etcd
-ETCDCTL_API=3 etcdctl --endpoints=127.0.0.1:2379 watch "/path/to" --prefix
+#ETCDCTL_API=3 etcdctl --endpoints=127.0.0.1:2379 watch "/path/to" --prefix
