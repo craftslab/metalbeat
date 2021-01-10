@@ -102,8 +102,8 @@ val: metalbeat
 - Master
 
 ```
-key: /metalflow/worker/{HOST}/docker
-val: pull|restart|rm|rmi|run|start|stop
+key: /metalflow/worker/{HOST}/image
+val: pull|restart|rm|start|stop
 
 key: /metalflow/worker/{HOST}/name
 val: metalmetrics
