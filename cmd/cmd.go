@@ -25,7 +25,6 @@ import (
 	"github.com/craftslab/metalbeat/beat"
 	"github.com/craftslab/metalbeat/config"
 	"github.com/craftslab/metalbeat/etcd"
-	"github.com/craftslab/metalbeat/flow"
 )
 
 var (
@@ -47,14 +46,9 @@ func Run() {
 		log.Fatalf("failed to init etcd: %v", err)
 	}
 
-	b, err := initBeat(c)
-	if err != nil {
-		log.Fatalf("failed to init beat: %v", err)
-	}
-
 	log.Println("beat running")
 
-	if err := runFlow(c, b, e); err != nil {
+	if err := runBeat(c, e); err != nil {
 		log.Fatalf("failed to run beat: %v", err)
 	}
 
@@ -89,26 +83,22 @@ func initConfig(name string) (*config.Config, error) {
 }
 
 func initEtcd(cfg *config.Config) (etcd.Etcd, error) {
-	endpoint := cfg.Spec.Sd.Host + ":" + cfg.Spec.Sd.Port
+	endpoint := cfg.Spec.Etcd.Host + ":" + cfg.Spec.Etcd.Port
 	return etcd.New(context.Background(), []string{endpoint}, etcd.DefaultConfig()), nil
 }
 
-func initBeat(_ *config.Config) (beat.Beat, error) {
-	return beat.New(beat.DefaultConfig()), nil
-}
-
-func runFlow(_ *config.Config, b beat.Beat, e etcd.Etcd) error {
-	cfg := flow.DefaultConfig()
+func runBeat(_ *config.Config, e etcd.Etcd) error {
+	cfg := beat.DefaultConfig()
 	if cfg == nil {
 		return errors.New("failed to config")
 	}
 
 	cfg.Host = *hostAddr
 
-	fl := flow.New(b, e, cfg)
-	if fl == nil {
+	be := beat.New(cfg, e)
+	if be == nil {
 		return errors.New("failed to new")
 	}
 
-	return fl.Run()
+	return be.Run()
 }

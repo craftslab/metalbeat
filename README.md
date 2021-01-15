@@ -82,9 +82,8 @@ kind: agent
 metadata:
   name: metalbeat
 spec:
-  sd:
+  etcd:
     host: 127.0.0.1
-    name: etcd
     port: 2379
 ```
 
@@ -95,21 +94,15 @@ spec:
 - Agent
 
 ```
-key: /metalflow/agent/{HOST}/name
+key: /metalflow/agent/{HOST}/register
 val: metalbeat
 ```
 
 - Master
 
 ```
-key: /metalflow/worker/{HOST}/image
-val: pull|restart|rm|start|stop
-
-key: /metalflow/worker/{HOST}/name
-val: metalmetrics
-
-key: /metalflow/worker/{HOST}/port
-val: 9090
+key: /metalflow/worker/{HOST}/dispatch
+val: {COMMAND};{COMMAND};...
 ```
 
 

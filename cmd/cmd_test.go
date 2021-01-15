@@ -38,11 +38,3 @@ func TestInitEtcd(t *testing.T) {
 	_, err = initEtcd(c)
 	assert.Equal(t, nil, err)
 }
-
-func TestInitBeat(t *testing.T) {
-	c, err := initConfig("../tests/config.yml")
-	assert.Equal(t, nil, err)
-
-	_, err = initBeat(c)
-	assert.Equal(t, nil, err)
-}

@@ -12,24 +12,78 @@
 
 package beat
 
+import (
+	"github.com/craftslab/metalbeat/etcd"
+	"github.com/pkg/errors"
+)
+
 type Beat interface {
 	Run() error
 }
 
 type Config struct {
+	Host string
 }
 
 type beat struct {
+	etcd etcd.Etcd
+	quit chan struct{}
+	reg  string
+	wch  string
 }
 
-func New(config *Config) Beat {
-	return &beat{}
+func New(c *Config, e etcd.Etcd) Beat {
+	return &beat{
+		etcd: e,
+		reg:  "/metalflow/agent/" + c.Host + "/register",
+		wch:  "/metalflow/worker/" + c.Host,
+	}
 }
 
 func DefaultConfig() *Config {
-	return &Config{}
+	return &Config{
+		Host: "127.0.0.1",
+	}
 }
 
 func (b *beat) Run() error {
+	if err := b.register(); err != nil {
+		return errors.Wrap(err, "failed to register")
+	}
+
+	if err := b.watch(); err != nil {
+		return errors.Wrap(err, "failed to watch")
+	}
+
+	return nil
+}
+
+func (b *beat) register() error {
+	return b.etcd.Register(b.reg, "metalbeat", etcd.TTLDuration)
+}
+
+func (b *beat) watch() error {
+	ch := make(chan struct{})
+
+	go func() {
+		_ = b.etcd.Watch(b.wch, ch)
+	}()
+
+	for {
+		select {
+		case <-ch:
+			if entries, err := b.etcd.GetEntries(b.wch); err == nil {
+				if err := b.dispatch(entries); err != nil {
+					return errors.Wrap(err, "failed to dispatch")
+				}
+			}
+		case <-b.quit:
+			return nil
+		}
+	}
+}
+
+func (b *beat) dispatch(event []string) error {
+	// TODO
 	return nil
 }

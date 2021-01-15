@@ -3,7 +3,6 @@ kind: agent
 metadata:
   name: metalbeat
 spec:
-  sd:
+  etcd:
     host: 127.0.0.1
-    name: etcd
     port: 2379

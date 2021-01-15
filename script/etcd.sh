@@ -4,7 +4,7 @@ VERSION=3.4.14
 ETCD=etcd-v$VERSION-linux-amd64
 URL=http://127.0.0.1:2379
 
-wget https://github.com/etcd-io/etcd/releases/download/v$VERSION/$ETCD.tar.gz
+curl -L https://github.com/etcd-io/etcd/releases/download/v$VERSION/$ETCD.tar.gz -o $ETCD.tar.gz
 tar zxvf $ETCD.tar.gz
 
 export PATH=$PWD/$ETCD:$PATH

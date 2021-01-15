@@ -24,12 +24,12 @@ import (
 )
 
 const (
-	dialKeepAlive = 3 * time.Second
-	dialTimeout   = 3 * time.Second
+	DialKeepAlive = 3 * time.Second
+	DialTimeout   = 3 * time.Second
 )
 
 const (
-	ttlDuration = 30 * time.Second
+	TTLDuration = 30 * time.Second
 )
 
 type Etcd interface {
@@ -71,11 +71,11 @@ func New(ctx context.Context, endpoints []string, config *Config) Etcd {
 	var err error
 
 	if config.DialKeepAlive == 0 {
-		config.DialKeepAlive = dialKeepAlive
+		config.DialKeepAlive = DialKeepAlive
 	}
 
 	if config.DialTimeout == 0 {
-		config.DialTimeout = dialTimeout
+		config.DialTimeout = DialTimeout
 	}
 
 	if config.CertFile != "" && config.KeyFile != "" {
@@ -115,9 +115,9 @@ func DefaultConfig() *Config {
 	return &Config{
 		CACert:        "",
 		CertFile:      "",
-		DialKeepAlive: dialKeepAlive,
+		DialKeepAlive: DialKeepAlive,
 		DialOptions:   []grpc.DialOption{grpc.WithBlock()},
-		DialTimeout:   dialTimeout,
+		DialTimeout:   DialTimeout,
 		KeyFile:       "",
 		Password:      "",
 		Username:      "",
@@ -132,7 +132,7 @@ func (e *etcd) Register(key, val string, ttl time.Duration) error {
 	}
 
 	if ttl == 0 {
-		ttl = ttlDuration
+		ttl = TTLDuration
 	}
 
 	if e.leaser != nil {

@@ -24,12 +24,11 @@ type MetaData struct {
 }
 
 type Spec struct {
-	Sd Sd `yaml:"sd"`
+	Etcd Etcd `yaml:"etcd"`
 }
 
-type Sd struct {
+type Etcd struct {
 	Host string `yaml:"host"`
-	Name string `yaml:"name"`
 	Port string `yaml:"port"`
 }
 

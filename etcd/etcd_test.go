@@ -24,9 +24,9 @@ func TestEtcd(t *testing.T) {
 	config := Config{
 		CACert:        "",
 		CertFile:      "",
-		DialKeepAlive: dialKeepAlive,
+		DialKeepAlive: DialKeepAlive,
 		DialOptions:   []grpc.DialOption{grpc.WithBlock()},
-		DialTimeout:   dialTimeout,
+		DialTimeout:   DialTimeout,
 		KeyFile:       "",
 		Password:      "",
 		Username:      "",
@@ -37,7 +37,7 @@ func TestEtcd(t *testing.T) {
 	e := New(context.Background(), []string{endpoint}, &config)
 	assert.NotEqual(t, nil, e)
 
-	err := e.Register("", "", ttlDuration)
+	err := e.Register("", "", TTLDuration)
 	assert.NotEqual(t, nil, err)
 
 	err = e.Watch("", nil)
@@ -56,7 +56,7 @@ func TestEtcd(t *testing.T) {
 	key := prefix + "/127.0.0.1/name"
 	val := "metalbeat"
 
-	err = e.Register(key, val, ttlDuration)
+	err = e.Register(key, val, TTLDuration)
 	assert.Equal(t, nil, err)
 
 	entries, err := e.GetEntries(key)
