@@ -29,6 +29,11 @@ const (
 )
 
 const (
+	EventDel = "DELETE"
+	EventPut = "PUT"
+)
+
+const (
 	TTLDuration = 30 * time.Second
 )
 
@@ -36,7 +41,7 @@ type Etcd interface {
 	Register(key, val string, ttl time.Duration) error
 	Deregister(key string) error
 
-	Watch(prefix string, ch chan struct{}) error
+	Watch(prefix string, ch chan map[string]string) error
 	Dewatch(prefix string) error
 
 	GetEntries(prefix string) ([]string, error)
@@ -196,7 +201,7 @@ func (e *etcd) Deregister(key string) error {
 	return nil
 }
 
-func (e *etcd) Watch(prefix string, ch chan struct{}) error {
+func (e *etcd) Watch(prefix string, ch chan map[string]string) error {
 	defer func() {
 		if e.watcher != nil {
 			_ = e.watcher.Close()
@@ -215,13 +220,22 @@ func (e *etcd) Watch(prefix string, ch chan struct{}) error {
 	e.watchCtx, e.watchCancel = context.WithCancel(e.ctx)
 
 	wch := e.watcher.Watch(e.watchCtx, prefix, clientv3.WithPrefix(), clientv3.WithRev(0))
-	ch <- struct{}{}
+	ch <- map[string]string{}
 
 	for item := range wch {
 		if item.Canceled {
 			return nil
 		}
-		ch <- struct{}{}
+		buf := make(map[string]string)
+		for _, ev := range item.Events {
+			switch ev.Type {
+			case 0:
+				buf[EventPut] = string(ev.Kv.Key)
+			case 1:
+				buf[EventDel] = string(ev.Kv.Key)
+			}
+		}
+		ch <- buf
 	}
 
 	return nil

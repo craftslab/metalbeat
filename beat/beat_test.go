@@ -13,11 +13,21 @@
 package beat
 
 import (
+	"context"
 	"testing"
 
+	"github.com/craftslab/metalbeat/etcd"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBeat(t *testing.T) {
-	assert.Equal(t, nil, nil)
+	endpoint := "127.0.0.1:2379"
+	e := etcd.New(context.Background(), []string{endpoint}, etcd.DefaultConfig())
+
+	c := DefaultConfig()
+	c.Host = "127.0.0.1"
+	assert.NotEqual(t, nil, c)
+
+	b := New(c, e)
+	assert.NotEqual(t, nil, b)
 }

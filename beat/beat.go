@@ -13,8 +13,22 @@
 package beat
 
 import (
-	"github.com/craftslab/metalbeat/etcd"
+	"os/exec"
+	"strings"
+
 	"github.com/pkg/errors"
+
+	"github.com/craftslab/metalbeat/etcd"
+	"github.com/craftslab/metalbeat/runtime"
+)
+
+const (
+	agent  = "/metalflow/agent/"
+	worker = "/metalflow/worker/"
+)
+
+const (
+	sep = " "
 )
 
 type Beat interface {
@@ -35,8 +49,8 @@ type beat struct {
 func New(c *Config, e etcd.Etcd) Beat {
 	return &beat{
 		etcd: e,
-		reg:  "/metalflow/agent/" + c.Host + "/register",
-		wch:  "/metalflow/worker/" + c.Host,
+		reg:  agent + c.Host + "/register",
+		wch:  worker + c.Host,
 	}
 }
 
@@ -63,7 +77,7 @@ func (b *beat) register() error {
 }
 
 func (b *beat) watch() error {
-	ch := make(chan struct{})
+	ch := make(chan map[string]string)
 
 	go func() {
 		_ = b.etcd.Watch(b.wch, ch)
@@ -71,8 +85,12 @@ func (b *beat) watch() error {
 
 	for {
 		select {
-		case <-ch:
-			if entries, err := b.etcd.GetEntries(b.wch); err == nil {
+		case ev := <-ch:
+			if key, ok := ev[etcd.EventPut]; ok {
+				entries, err := b.etcd.GetEntries(key)
+				if err != nil {
+					return errors.Wrap(err, "failed to get")
+				}
 				if err := b.dispatch(entries); err != nil {
 					return errors.Wrap(err, "failed to dispatch")
 				}
@@ -84,6 +102,23 @@ func (b *beat) watch() error {
 }
 
 func (b *beat) dispatch(event []string) error {
-	// TODO
+	for _, item := range event {
+		buf := []interface{}{
+			item,
+		}
+		if _, err := runtime.Run(b.routine, buf); err != nil {
+			return errors.Wrap(err, "failed to run")
+		}
+	}
+
 	return nil
+}
+
+func (b *beat) routine(cmd interface{}) interface{} {
+	slice := strings.Split(cmd.(string), sep)
+
+	c := exec.Command(slice[0], slice[1:]...) // nolint:gosec
+	_, err := c.CombinedOutput()
+
+	return err
 }
