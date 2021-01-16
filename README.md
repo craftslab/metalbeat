@@ -102,7 +102,7 @@ val: metalbeat
 
 ```
 key: /metalflow/worker/{HOST}/dispatch
-val: {COMMAND};{COMMAND};...
+val: {COMMAND}
 ```
 
 
