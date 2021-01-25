@@ -55,7 +55,7 @@ docker run -it craftslab/metalbeat:latest ./metalbeat --config-file="config.yml"
 
 ## Usage
 
-```bash
+```
 usage: metalbeat --config-file=CONFIG-FILE --host-addr=HOST-ADDR [<flags>]
 
 Metal Beat
@@ -66,6 +66,11 @@ Flags:
   --version                  Show application version.
   --config-file=CONFIG-FILE  Config file (.yml)
   --host-addr=HOST-ADDR      Host address
+```
+
+```bash
+# Fetch host address via ifconfig
+ifconfig -a | grep inet | grep -v 127.0.0.1 | grep -v 172.17.0.1 | grep -v inet6 | awk '{print $2}' | tr -d "addr:"
 ```
 
 
