@@ -94,6 +94,12 @@ spec:
 
 
 
+## Design
+
+![design](design.png)
+
+
+
 ## Etcd
 
 - Agent
@@ -109,12 +115,6 @@ val: metalbeat
 key: /metalflow/worker/{HOST}/dispatch
 val: {COMMAND}
 ```
-
-
-
-## Design
-
-![design](design.png)
 
 
 
