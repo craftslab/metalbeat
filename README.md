@@ -48,7 +48,7 @@ git clone https://github.com/craftslab/metalbeat.git
 
 cd metalbeat
 docker build --no-cache -f Dockerfile -t craftslab/metalbeat:latest .
-docker run -it craftslab/metalbeat:latest ./metalbeat --config-file="config.yml" --host-addr="127.0.0.1"
+docker run craftslab/metalbeat:latest /metalbeat --config-file="/config.yml" --host-addr="127.0.0.1"
 ```
 
 

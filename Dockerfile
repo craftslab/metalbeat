@@ -1,12 +1,12 @@
-FROM golang:latest as build-stage
+FROM golang:latest AS build-stage
 WORKDIR /go/src/app
 COPY . .
 RUN apt update && \
     apt install -y upx
 RUN make build
 
-FROM nginx as production-stage
-WORKDIR /go/dist/bin
-RUN mkdir -p /go/dist/bin
-COPY --from=build-stage /go/src/app/bin/* ./
-COPY --from=build-stage /go/src/app/config/*.yml ./
+FROM gcr.io/distroless/base-debian10 AS production-stage
+WORKDIR /
+COPY --from=build-stage /go/src/app/bin/* /
+COPY --from=build-stage /go/src/app/config/*.yml /
+USER nonroot:nonroot
